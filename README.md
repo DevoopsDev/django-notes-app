@@ -1,5 +1,8 @@
 # Testing Webhook CI/CD
 
+git add .
+git commit -m "test auto deploy"
+git push
 
 
 # Simple Notes App for TWS Community
