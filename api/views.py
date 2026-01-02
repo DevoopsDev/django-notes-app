@@ -76,3 +76,9 @@ def createNote(request):
     )
     serializer = NoteSerializer(note, many=False)
     return Response(serializer.data)
+
+from django.http import JsonResponse
+
+def health(request):
+    return JsonResponse({"status": "ok"})
+
