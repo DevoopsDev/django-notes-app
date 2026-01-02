@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import *
-
+from .views import health
 urlpatterns = [
     path('', getRoutes, name="routes"),
     path('notes/', getNotes, name="notes"),
@@ -8,4 +8,8 @@ urlpatterns = [
     path('notes/<str:pk>/delete/', deleteNote, name="delete-note"),
     path('notes/create/', createNote, name="create-note"),
     path('notes/<str:pk>/', getNote, name="note"),
+    path('health/', health),
 ]
+
+
+
