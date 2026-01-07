@@ -1,26 +1,26 @@
+
+
 #!/bin/bash
 set -e
 
 IMAGE=$1
 APP=notes-app
 NETWORK=notes-net
+NGINX_CONTAINER=nginx
 
 echo "🟡 Starting CANARY deployment (10%)"
 
 # Ensure network exists
 docker network inspect ${NETWORK} >/dev/null 2>&1 || docker network create ${NETWORK}
 
-# ---- FIX STARTS HERE ----
-
-# Remove stopped BLUE container if exists
+# Remove stopped BLUE if exists
 if docker ps -a --format '{{.Names}}' | grep -q "^${APP}-blue$"; then
   if ! docker ps --format '{{.Names}}' | grep -q "^${APP}-blue$"; then
-    echo "🧹 Removing stopped BLUE container"
     docker rm ${APP}-blue
   fi
 fi
 
-# Start BLUE if not running
+# Start BLUE
 if ! docker ps --format '{{.Names}}' | grep -q "^${APP}-blue$"; then
   echo "🔵 Starting BLUE container"
   docker run -d \
@@ -29,12 +29,10 @@ if ! docker ps --format '{{.Names}}' | grep -q "^${APP}-blue$"; then
     ${IMAGE}
 fi
 
-# ---- FIX ENDS HERE ----
-
-# Remove old GREEN if exists
+# Remove old GREEN
 docker rm -f ${APP}-green >/dev/null 2>&1 || true
 
-# Start GREEN (canary)
+# Start GREEN
 echo "🟢 Starting GREEN container"
 docker run -d \
   --name ${APP}-green \
@@ -52,8 +50,10 @@ docker exec ${APP}-green curl -f http://localhost:8000/health/ || {
 
 echo "✅ Canary container healthy"
 
-# Nginx 90/10 traffic split
-sudo tee /etc/nginx/conf.d/notes-app.conf >/dev/null <<EOF
+# Write nginx config (INSIDE docker nginx)
+docker exec ${NGINX_CONTAINER} sh -c "cat > /etc/nginx/conf.d/notes-app.conf" <<EOF
+resolver 127.0.0.11 valid=10s;
+
 upstream notes_backend {
     server ${APP}-blue:8000 weight=9;
     server ${APP}-green:8000 weight=1;
@@ -69,8 +69,18 @@ server {
 }
 EOF
 
-sudo nginx -t
-sudo systemctl reload nginx
+# Wait for Docker DNS
+echo "⏳ Waiting for Docker DNS..."
+for i in {1..15}; do
+  if docker exec ${NGINX_CONTAINER} getent hosts ${APP}-blue >/dev/null 2>&1 && \
+     docker exec ${NGINX_CONTAINER} getent hosts ${APP}-green >/dev/null 2>&1; then
+    break
+  fi
+  sleep 2
+done
+
+# Reload nginx safely
+docker exec ${NGINX_CONTAINER} nginx -t
+docker exec ${NGINX_CONTAINER} nginx -s reload
 
 echo "🟡 Canary live with 10% traffic"
-
