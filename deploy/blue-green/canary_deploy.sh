@@ -10,8 +10,18 @@ echo "🟡 Starting CANARY deployment (10%)"
 # Ensure network exists
 docker network inspect ${NETWORK} >/dev/null 2>&1 || docker network create ${NETWORK}
 
+# ---- FIX STARTS HERE ----
+
+# Remove stopped BLUE container if exists
+if docker ps -a --format '{{.Names}}' | grep -q "^${APP}-blue$"; then
+  if ! docker ps --format '{{.Names}}' | grep -q "^${APP}-blue$"; then
+    echo "🧹 Removing stopped BLUE container"
+    docker rm ${APP}-blue
+  fi
+fi
+
 # Start BLUE if not running
-if ! docker ps --format '{{.Names}}' | grep -q "${APP}-blue"; then
+if ! docker ps --format '{{.Names}}' | grep -q "^${APP}-blue$"; then
   echo "🔵 Starting BLUE container"
   docker run -d \
     --name ${APP}-blue \
@@ -19,17 +29,19 @@ if ! docker ps --format '{{.Names}}' | grep -q "${APP}-blue"; then
     ${IMAGE}
 fi
 
-# Remove old green if exists
+# ---- FIX ENDS HERE ----
+
+# Remove old GREEN if exists
 docker rm -f ${APP}-green >/dev/null 2>&1 || true
 
-# Start GREEN (NO PORT BINDING ❗)
+# Start GREEN (canary)
 echo "🟢 Starting GREEN container"
 docker run -d \
   --name ${APP}-green \
   --network ${NETWORK} \
   ${IMAGE}
 
-# Health check inside container
+# Health check
 echo "❤️ Health check on GREEN"
 sleep 10
 docker exec ${APP}-green curl -f http://localhost:8000/health/ || {
@@ -40,7 +52,7 @@ docker exec ${APP}-green curl -f http://localhost:8000/health/ || {
 
 echo "✅ Canary container healthy"
 
-# Enable 10% traffic via Nginx
+# Nginx 90/10 traffic split
 sudo tee /etc/nginx/conf.d/notes-app.conf >/dev/null <<EOF
 upstream notes_backend {
     server ${APP}-blue:8000 weight=9;
@@ -61,3 +73,4 @@ sudo nginx -t
 sudo systemctl reload nginx
 
 echo "🟡 Canary live with 10% traffic"
+
