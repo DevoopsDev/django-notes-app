@@ -1,19 +1,17 @@
 #!/bin/bash
 set -e
 
-PORTS=(8001 8002)
-
 echo "🧹 Cleaning stale docker ports"
 
-for PORT in "${PORTS[@]}"; do
-  if sudo ss -lntp | grep -q ":${PORT} "; then
-    echo "⚠️ Port ${PORT} busy — killing docker-proxy"
-    sudo pkill -f "docker-proxy.*:${PORT}" || true
+for PORT in 8001 8002; do
+  if lsof -i :$PORT >/dev/null 2>&1; then
+    echo "⚠️ Port $PORT busy — killing docker-proxy"
+    sudo fuser -k ${PORT}/tcp || true
   else
-    echo "✅ Port ${PORT} free"
+    echo "✅ Port $PORT free"
   fi
 done
 
-echo "🔁 Restarting Docker"
-sudo systemctl restart docker
-sleep 5
+# ❌ DO NOT restart docker in CI/CD
+# sudo systemctl restart docker
+
