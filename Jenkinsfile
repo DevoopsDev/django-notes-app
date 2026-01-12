@@ -41,10 +41,11 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                sh '''
-                  echo "Deploy stage placeholder"
-                  # kubectl apply -f k8s/
-                '''
+                sh """
+sed -i 's/BUILD_TAG/${IMAGE_TAG}/g' k8s/base/deployment.yaml
+kubectl apply -f k8s/base/
+"""
+
             }
         }
     }
