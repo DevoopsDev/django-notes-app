@@ -3,7 +3,8 @@ pipeline {
 
     environment {
         IMAGE_NAME = "notes-app"
-        IMAGE_TAG  = "latest"
+        IMAGE_TAG = "${BUILD_NUMBER}"
+
     }
 
     stages {
