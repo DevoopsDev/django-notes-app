@@ -2,10 +2,10 @@ pipeline {
     agent { label 'jenkins-agent-1' }
 
     environment {
-        IMAGE_NAME = "notes-app"
-        IMAGE_TAG = "${BUILD_NUMBER}"
+  DOCKER_REPO = "azuredevdevops/notes-app"
+  IMAGE_TAG   = "${BUILD_NUMBER}"
+}
 
-    }
 
     stages {
 
