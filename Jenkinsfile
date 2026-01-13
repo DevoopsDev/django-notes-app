@@ -39,17 +39,18 @@ pipeline {
             }
         }
 
-        stage('Deploy to Kubernetes') {
+     stage('Deploy to Kubernetes') {
   steps {
     sh '''
-      echo "Updating image tag in deployment"
-      sed -i "s|notes-app:BUILD_TAG|azuredevdevops/notes-app:${BUILD_NUMBER}|g" k8s/deployment.yaml
+      kubectl set image deployment/django-app \
+        django=azuredevdevops/notes-app:${BUILD_NUMBER} \
+        -n notes-app
 
-      kubectl apply -f k8s/
       kubectl rollout status deployment/django-app -n notes-app
     '''
   }
 }
+
 
     }
 
