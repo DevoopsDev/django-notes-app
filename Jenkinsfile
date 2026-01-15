@@ -2,10 +2,10 @@ pipeline {
     agent { label 'jenkins-agent-1' }
 
     environment {
-  DOCKER_REPO = "azuredevdevops/notes-app"
-  IMAGE_TAG   = "${BUILD_NUMBER}"
-}
-
+        IMAGE_NAME = "notes-app"
+        DOCKER_REPO = "azuredevdevops"
+        IMAGE_TAG  = "${BUILD_NUMBER}"
+    }
 
     stages {
 
@@ -18,6 +18,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 sh '''
+                  echo "Building image: $IMAGE_NAME:$IMAGE_TAG"
                   docker build -t $IMAGE_NAME:$IMAGE_TAG .
                 '''
             }
@@ -39,27 +40,25 @@ pipeline {
             }
         }
 
-     stage('Deploy to Kubernetes') {
-  steps {
-    sh '''
-      kubectl set image deployment/django-app \
-        django=azuredevdevops/notes-app:${BUILD_NUMBER} \
-        -n notes-app
-
-      kubectl rollout status deployment/django-app -n notes-app
-    '''
-  }
-}
-
-
+        stage('Deploy to Kubernetes') {
+            steps {
+                sh '''
+                  echo "Deploying image to Kubernetes"
+                  sed -i "s|notes-app:BUILD_TAG|$DOCKER_REPO/$IMAGE_NAME:$IMAGE_TAG|g" k8s/deployment.yaml
+                  kubectl apply -f k8s/
+                  kubectl rollout status deployment/django-app -n notes-app
+                '''
+            }
+        }
     }
 
     post {
-        success {
-            echo "✅ Pipeline completed successfully"
-        }
         failure {
-            echo "❌ Pipeline failed"
+            echo "❌ Deployment failed — rolling back"
+            sh 'kubectl rollout undo deployment/django-app -n notes-app || true'
+        }
+        success {
+            echo "✅ Deployment successful"
         }
     }
 }
