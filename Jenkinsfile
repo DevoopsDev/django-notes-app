@@ -40,16 +40,18 @@ pipeline {
             }
         }
 
-        stage('Deploy to Kubernetes') {
-            steps {
-                sh '''
-                  echo "Deploying image to Kubernetes"
-                  sed -i "s|notes-app:BUILD_TAG|$DOCKER_REPO/$IMAGE_NAME:$IMAGE_TAG|g" k8s/deployment.yaml
-                  kubectl apply -f k8s/
-                  kubectl rollout status deployment/django-app -n notes-app
-                '''
-            }
-        }
+       stage('Deploy with Helm') {
+    steps {
+        sh '''
+          helm upgrade --install notes-app helm/notes-app \
+            --namespace notes-app \
+            --create-namespace \
+            --set image.tag=${BUILD_NUMBER}
+        '''
+    }
+}
+
+        
     }
 
     post {
