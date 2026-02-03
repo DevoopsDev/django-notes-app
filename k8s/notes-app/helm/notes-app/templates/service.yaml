@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "notes-app.fullname" . }}
+spec:
+  type: {{ .Values.service.type }}
+  selector:
+    app: {{ include "notes-app.name" . }}
+  ports:
+  - port: {{ .Values.service.port }}
+    targetPort: 80
+
