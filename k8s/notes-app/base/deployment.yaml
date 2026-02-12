@@ -3,14 +3,13 @@ kind: Deployment
 metadata:
   name: notes-app
 spec:
-  replicas: 2
   selector:
     matchLabels:
-      app: notes
+      app: notes-app
   template:
     metadata:
       labels:
-        app: notes
+        app: notes-app
     spec:
       containers:
       - name: notes
