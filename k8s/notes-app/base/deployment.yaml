@@ -17,3 +17,6 @@ spec:
         image: nginx:1.25   # (we’ll replace with your image next)
         ports:
         - containerPort: 80
+	envFrom:
+  	- secretRef:
+      	name: django-secrets
