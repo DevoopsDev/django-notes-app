@@ -1,0 +1,4 @@
+
+resources:
+  - overlays/prod
+  - secrets/django-sealed-secret.yaml
