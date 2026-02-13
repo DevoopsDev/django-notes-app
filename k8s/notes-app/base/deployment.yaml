@@ -3,6 +3,7 @@ kind: Deployment
 metadata:
   name: notes-app
 spec:
+  replicas: 3
   selector:
     matchLabels:
       app: notes-app
@@ -12,10 +13,11 @@ spec:
         app: notes-app
     spec:
       containers:
-      - name: notes
-      image: azuredevdevops/notes-app:128  # (we’ll replace with your image next)
-        ports:
-        - containerPort: 80
-  envFrom:
-    - secretRef:
-        name: django-secrets
+        - name: notes-app
+          image: azuredevdevops/notes-app:128
+          ports:
+            - containerPort: 80
+          envFrom:
+            - secretRef:
+                name: django-secrets
+
