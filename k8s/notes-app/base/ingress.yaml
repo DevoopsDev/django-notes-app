@@ -1,14 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
 metadata:
+  name: django-ingress
+  namespace: notes-app
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
   ingressClassName: nginx
   tls:
-  - hosts:
-    - notes.devopsdev.wuaze.com
-    secretName: notes-tls
+    - hosts:
+        - notes.devopsdev.wuaze.com
+      secretName: notes-tls
+  rules:
+    - host: notes.devopsdev.wuaze.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: notes-service
+                port:
+                  number: 80
 
-annotations:
-  cert-manager.io/cluster-issuer: letsencrypt-prod
-rules:
-- host: notes.devopsdev.wuaze.com
