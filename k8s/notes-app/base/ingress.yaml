@@ -2,9 +2,13 @@ metadata:
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
+  ingressClassName: nginx
   tls:
-    - hosts:
-        - notes.devopsdev.net
-      secretName: notes-app-tls
-  rules:
-    - host: notes.devopsdev.net
+  - hosts:
+    - notes.devopsdev.wuaze.com
+    secretName: notes-tls
+
+annotations:
+  cert-manager.io/cluster-issuer: letsencrypt-prod
+rules:
+- host: notes.devopsdev.wuaze.com
