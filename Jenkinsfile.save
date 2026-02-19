@@ -1,0 +1,55 @@
+pipeline {
+    agent { label 'jenkins-agent-1' }
+
+    environment {
+        IMAGE_NAME = "notes-app"
+        DOCKER_REPO = "azuredevdevops"
+        IMAGE_TAG  = "${BUILD_NUMBER}"
+    }
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh '''
+                  echo "Building image: $IMAGE_NAME:$IMAGE_TAG"
+                  docker build -t $IMAGE_NAME:$IMAGE_TAG .
+                '''
+            }
+        }
+
+        stage('Push to DockerHub') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerHubCreds',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh '''
+                      echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                      docker tag $IMAGE_NAME:$IMAGE_TAG $DOCKER_USER/$IMAGE_NAME:$IMAGE_TAG
+                      docker push $DOCKER_USER/$IMAGE_NAME:$IMAGE_TAG
+                    '''
+                }
+            }
+        }
+
+        stage('Deploy with Helm') {
+            steps {
+                sh '''
+                  helm upgrade --install notes-app helm/notes-app \
+                    --namespace notes-app \
+                    --create-namespace \
+                    --set image.tag=${BUILD_NUMBER}
+                '''
+            }
+        }
+    }
+}
+

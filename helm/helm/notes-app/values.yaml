@@ -1,0 +1,9 @@
+replicaCount: 2
+
+image:
+  repository: azuredevdevops/notes-app
+  tag: latest
+  pullPolicy: Always
+
+service:
+  port: 8000

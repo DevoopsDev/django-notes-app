@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: django-config
+  namespace: notes-app
+data:
+  DJANGO_DEBUG: "False"
+  DJANGO_ALLOWED_HOSTS: "*"
+  DB_NAME: notesappdb
+  DB_USER: admin
+  DB_HOST: notesapp-db.cp8qq4m424ur.eu-north-1.rds.amazonaws.com
+  DB_PORT: "3306"

@@ -1,0 +1,18 @@
+image:
+  repository: azuredevdevops/notes-app
+  tag: "128"
+  pullPolicy: Always
+
+canary:
+  enabled: false
+  replicaCount: 1
+  image:
+    tag: ""
+
+green:
+  enabled: false
+  replicaCount: 2
+  image:
+    tag: ""
+traffic:
+  color: blue
