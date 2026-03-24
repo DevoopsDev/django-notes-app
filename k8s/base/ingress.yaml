@@ -4,7 +4,7 @@ metadata:
   name: django-ingress
   namespace: notes-app
 spec:
-  ingressClassName: nginx
+  ingressClassName: nginx-v2
   rules:
     - host: notes.local
       http:
