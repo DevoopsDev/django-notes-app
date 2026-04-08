@@ -19,7 +19,7 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: notes-service
+                name: notes-stable
                 port:
                   number: 80
 
