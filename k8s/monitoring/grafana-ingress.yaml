@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: grafana
+  namespace: monitoring
+spec:
+  ingressClassName: nginx-v2
+  rules:
+  - host: grafana.a7d3573f1805645ab9900cdddcfd9f10-1651240173.eu-north-1.elb.amazonaws.com.nip.io
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: monitoring-grafana
+            port:
+              number: 80
