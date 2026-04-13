@@ -2,29 +2,11 @@ apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
   name: notes-app
-  namespace: notes-app
 spec:
   replicas: 3
-
   selector:
     matchLabels:
       app: notes-app
-
-  strategy:
-    canary:
-      canaryService: notes-canary
-      stableService: notes-stable
-
-      trafficRouting:
-        nginx:
-          stableIngress: notes-ingress
-
-      steps:
-      - setWeight: 20
-      - pause: {duration: 30s}
-      - setWeight: 50
-      - pause: {duration: 30s}
-      - setWeight: 100
 
   template:
     metadata:
@@ -33,6 +15,17 @@ spec:
     spec:
       containers:
       - name: notes-app
-        image: azuredevdevops/notes-app:128
+        image: your-image
         ports:
-        - containerPort: 80
+        - containerPort: 8000
+
+  strategy:
+    canary:
+      stableService: notes-stable      ✅ CRITICAL
+      canaryService: notes-canary      ✅ CRITICAL
+
+      steps:
+      - setWeight: 20
+      - pause: {duration: 60}
+      - setWeight: 50
+      - pause: {duration: 60}
