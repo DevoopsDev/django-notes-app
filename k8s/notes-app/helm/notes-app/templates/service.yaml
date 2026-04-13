@@ -7,6 +7,6 @@ spec:
   selector:
     app: {{ include "notes-app.name" . }}
   ports:
-  - port: {{ .Values.service.port }}
-    targetPort: 80
-
+  - name: http
+    port: {{ .Values.service.port }}
+    targetPort: 8000
