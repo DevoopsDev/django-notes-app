@@ -20,12 +20,12 @@ spec:
         - containerPort: 8000
 
   strategy:
-    canary:
-      stableService: notes-stable      ✅ CRITICAL
-      canaryService: notes-canary      ✅ CRITICAL
+  canary:
+    stableService: notes-stable      ✅ REQUIRED
+    canaryService: notes-canary      ✅ REQUIRED
 
-      steps:
-      - setWeight: 20
-      - pause: {duration: 60}
-      - setWeight: 50
-      - pause: {duration: 60}
+    steps:
+    - setWeight: 20
+    - pause: {}
+    - setWeight: 50
+    - pause: {}
