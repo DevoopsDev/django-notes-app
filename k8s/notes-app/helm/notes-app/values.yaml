@@ -1,7 +1,7 @@
 replicaCount: 1
 
 image:
-  repository: nginx
+  repository: azuredevdevops/notes-app
   tag: "1.25"
   pullPolicy: IfNotPresent
 
