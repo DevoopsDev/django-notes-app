@@ -2,7 +2,7 @@ replicaCount: 1
 
 image:
   repository: azuredevdevops/notes-app
-  tag: "1.25"
+  tag: "130"
   pullPolicy: IfNotPresent
 
 service:
